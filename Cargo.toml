@@ -1,0 +1,24 @@
+[package]
+name        = "fs-info"
+description = "System information service for FreeSynergy (CPU, memory, disk, services)"
+version     = "0.1.0"
+edition     = "2021"
+license     = "MIT"
+authors     = ["FreeSynergy.Net"]
+repository  = "https://github.com/FreeSynergy/fs-info"
+
+[features]
+default = []
+# Enable smartctl-based SMART disk health queries.
+smart = ["dep:serde_json"]
+
+[dependencies]
+fs-error    = { path = "../fs-libs/fs-error" }
+serde       = { version = "1", features = ["derive"] }
+toml        = { version = "1", features = ["preserve_order"] }
+tracing     = { version = "0.1" }
+sysinfo     = "0.38"
+
+[dependencies.serde_json]
+version  = "1"
+optional = true
