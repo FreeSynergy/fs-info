@@ -1,0 +1,9 @@
+[package]
+id          = "freesynergy/fs-info"
+name        = "fs-info"
+version     = "0.1.0"
+type        = "library"
+description = "System information for FreeSynergy — CPU, memory, disk, network, uptime, thermal"
+license     = "MIT"
+authors     = ["FreeSynergy.Net"]
+repository  = "https://github.com/FreeSynergy/fs-info"

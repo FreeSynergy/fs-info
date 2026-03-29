@@ -2,7 +2,7 @@
 
 ## What is this?
 
-FreeSynergy System Info — detects and reports CPU, memory, disk, thermal, and system feature
+FreeSynergy System Info — detects and reports CPU, memory, disk, network, thermal, and uptime
 information. Used by Store, Desktop widgets, Managers, and other programs.
 
 ## Rules
@@ -16,32 +16,32 @@ information. Used by Store, Desktop widgets, Managers, and other programs.
 ## Quality Gates (before every commit)
 
 ```
-1. Design Pattern (Traits, Object hierarchy)
-2. Structs + Traits — no impl code yet
-3. cargo check
-4. Impl (OOP)
-5. cargo clippy --all-targets -- -D warnings
-6. cargo fmt --check
-7. Unit tests (min. 1 per public module)
-8. cargo test
-9. commit + push
+cargo clippy --all-targets -- -D warnings
+cargo fmt --check
+cargo test
 ```
 
 Every lib.rs / main.rs must have:
 ```rust
-#![deny(clippy::all, clippy::pedantic)]
-#![deny(warnings)]
+#![deny(clippy::all, clippy::pedantic, warnings)]
 ```
 
 ## Architecture
 
-- `OsInfo`           — OS type, version, architecture, kernel, hostname
+- `SystemInfo` — **trait**: unified interface for all system info queries
+- `FsInfo` — facade implementing `SystemInfo` + `MetricsCollector`
+- `MetricsCollector` — **trait**: `collect() → Vec<Metric>`
+- `Metric` — named numeric value with unit
+- `CpuInfo` — CPU usage, load average, core count
+- `MemInfo` — RAM and swap usage
+- `DiskInfo` — partition list with used/free bytes
+- `NetworkInfo` — network interface statistics
+- `Uptime` — system uptime
+- `ThermalInfo` — CPU temperature sensors
+- `OsInfo` — OS type, version, architecture, kernel, hostname
 - `DetectedFeatures` — which system features are present (systemd, Podman, …)
-- `SysInfoCache`     — persistent cache (~/.config/fsn/sysinfo.toml, TTL 24h)
-- `DiskInfo`         — partition list with used/free bytes
-- `MemInfo`          — RAM and swap usage
-- `ThermalInfo`      — CPU temperature sensors
-- `AlertChecker`     — compares live metrics against configurable thresholds
+- `SysInfoCache` — persistent cache (~/.config/fsn/sysinfo.toml, TTL 24h)
+- `AlertChecker` — compares live metrics against configurable thresholds
 
 ## Features
 
