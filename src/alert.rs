@@ -6,10 +6,11 @@
 //! publishing alerts to the message bus.
 //!
 //! Bus topics:
-//! - `sysinfo.alert.disk`   — disk partition above threshold
-//! - `sysinfo.alert.memory` — RAM usage above threshold
-//! - `sysinfo.alert.cpu`    — CPU temperature above threshold
-//! - `sysinfo.alert.smart`  — SMART failure detected (feature = "smart")
+//! - `system::health::degraded`         — any health threshold exceeded (+ detail topic below)
+//! - `system::health::disk::degraded`   — disk partition above threshold
+//! - `system::health::memory::degraded` — RAM usage above threshold
+//! - `system::health::cpu::degraded`    — CPU temperature above threshold
+//! - `system::health::smart::degraded`  — SMART failure detected (feature = "smart")
 
 use serde::{Deserialize, Serialize};
 
@@ -57,14 +58,25 @@ pub enum SysInfoAlert {
 }
 
 impl SysInfoAlert {
-    /// Bus topic for this alert type, e.g. `"sysinfo.alert.disk"`.
+    /// Bus topic for this alert type, e.g. `"system::health::degraded"`.
     pub fn bus_topic(&self) -> &'static str {
         match self {
-            SysInfoAlert::DiskFull { .. } => "sysinfo.alert.disk",
-            SysInfoAlert::CpuHot { .. } => "sysinfo.alert.cpu",
-            SysInfoAlert::MemoryFull { .. } => "sysinfo.alert.memory",
+            SysInfoAlert::DiskFull { .. } => "system::health::degraded",
+            SysInfoAlert::CpuHot { .. } => "system::health::degraded",
+            SysInfoAlert::MemoryFull { .. } => "system::health::degraded",
             #[cfg(feature = "smart")]
-            SysInfoAlert::SmartError { .. } => "sysinfo.alert.smart",
+            SysInfoAlert::SmartError { .. } => "system::health::degraded",
+        }
+    }
+
+    /// Specific sub-topic for this alert type (more granular than `bus_topic`).
+    pub fn detail_topic(&self) -> &'static str {
+        match self {
+            SysInfoAlert::DiskFull { .. } => "system::health::disk::degraded",
+            SysInfoAlert::CpuHot { .. } => "system::health::cpu::degraded",
+            SysInfoAlert::MemoryFull { .. } => "system::health::memory::degraded",
+            #[cfg(feature = "smart")]
+            SysInfoAlert::SmartError { .. } => "system::health::smart::degraded",
         }
     }
 
