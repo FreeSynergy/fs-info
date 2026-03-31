@@ -48,11 +48,14 @@
 //! ```
 
 pub mod alert;
+pub mod bus_publisher;
 pub mod cache;
+pub mod cli;
 pub mod cpu;
 pub mod disk;
 pub mod facade;
 pub mod features;
+pub mod grpc;
 pub mod mem;
 pub mod metric;
 pub mod network;
