@@ -26,6 +26,12 @@ pub enum Feature {
     Ssh,
     /// smartmontools (`smartctl`) is installed.
     Smartctl,
+    /// A Wayland compositor is running (`WAYLAND_DISPLAY` is set).
+    WaylandDisplay,
+    /// An X11 display server is running (`DISPLAY` is set).
+    X11Display,
+    /// stdin is connected to an interactive terminal (TTY).
+    Terminal,
 }
 
 impl Feature {
@@ -41,6 +47,9 @@ impl Feature {
             Feature::Git => "Git",
             Feature::Ssh => "SSH",
             Feature::Smartctl => "smartmontools",
+            Feature::WaylandDisplay => "Wayland",
+            Feature::X11Display => "X11",
+            Feature::Terminal => "Terminal (TTY)",
         }
     }
 
@@ -56,6 +65,9 @@ impl Feature {
             Feature::Git => binary_in_path("git"),
             Feature::Ssh => binary_in_path("ssh"),
             Feature::Smartctl => binary_in_path("smartctl"),
+            Feature::WaylandDisplay => check_wayland_display(),
+            Feature::X11Display => check_x11_display(),
+            Feature::Terminal => check_terminal(),
         }
     }
 
@@ -71,6 +83,9 @@ impl Feature {
             "git" => Some(Feature::Git),
             "ssh" => Some(Feature::Ssh),
             "smartctl" | "smart" => Some(Feature::Smartctl),
+            "wayland_display" | "wayland" => Some(Feature::WaylandDisplay),
+            "x11_display" | "x11" => Some(Feature::X11Display),
+            "terminal" | "tty" => Some(Feature::Terminal),
             _ => None,
         }
     }
@@ -96,6 +111,9 @@ impl DetectedFeatures {
             Feature::Git,
             Feature::Ssh,
             Feature::Smartctl,
+            Feature::WaylandDisplay,
+            Feature::X11Display,
+            Feature::Terminal,
         ];
         let available = all.iter().copied().filter(|f| f.is_available()).collect();
         DetectedFeatures { available }
@@ -104,6 +122,16 @@ impl DetectedFeatures {
     /// Returns `true` when `feature` is in the detected set.
     pub fn has(&self, feature: Feature) -> bool {
         self.available.contains(&feature)
+    }
+
+    /// Returns `true` when any graphical display server is available.
+    pub fn has_display_server(&self) -> bool {
+        self.has(Feature::WaylandDisplay) || self.has(Feature::X11Display)
+    }
+
+    /// Returns `true` when stdin is an interactive terminal (TTY).
+    pub fn has_terminal(&self) -> bool {
+        self.has(Feature::Terminal)
     }
 }
 
@@ -173,4 +201,17 @@ fn check_launchd() -> bool {
     {
         false
     }
+}
+
+fn check_wayland_display() -> bool {
+    std::env::var("WAYLAND_DISPLAY").is_ok()
+}
+
+fn check_x11_display() -> bool {
+    std::env::var("DISPLAY").is_ok()
+}
+
+fn check_terminal() -> bool {
+    use std::io::IsTerminal;
+    std::io::stdin().is_terminal()
 }
